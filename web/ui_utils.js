@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+ import _ from 'lodash'
 import { createPromiseCapability } from 'pdfjs-lib';
-
 const CSS_UNITS = 96.0 / 72.0;
 const DEFAULT_SCALE_VALUE = 'auto';
 const DEFAULT_SCALE = 1.0;
@@ -398,9 +398,23 @@ function getPDFFileNameFromURL(url, defaultFilename = 'document.pdf') {
   // Pattern to get last matching NAME.pdf
   const reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
   let splitURI = reURI.exec(url);
+
   let suggestedFilename = reFilename.exec(splitURI[1]) ||
                           reFilename.exec(splitURI[2]) ||
                           reFilename.exec(splitURI[3]);
+  let uriSearch = splitURI[2];
+  if (uriSearch) {
+    uriSearch = _.keyBy(_.map(uriSearch.substr(1).split('&'), (pair) => {
+      return {
+        key: _.first(pair.split('=')),
+        value: _.last(pair.split('=')),
+      };
+    }), 'key');
+
+    if (uriSearch.suggestedFilename) {
+      suggestedFilename = [uriSearch.suggestedFilename.value];
+    }
+  }
   if (suggestedFilename) {
     suggestedFilename = suggestedFilename[0];
     if (suggestedFilename.includes('%')) {
