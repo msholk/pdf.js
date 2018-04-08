@@ -6,6 +6,11 @@ PDF.js is community-driven and supported by Mozilla Labs. Our goal is to
 create a general-purpose, web standards-based platform for parsing and
 rendering PDFs.
 
+## Changes
++ Allow using from localhost:8080, when files are loaded from other locations
++ Specify download file name through URL(&suggestedFilename=)
++ Add pinch to zoom to viewer
++ Specify locale through URL(&locale)
 ## Contributing
 
 PDF.js is an open source project and always looking for more contributors. To

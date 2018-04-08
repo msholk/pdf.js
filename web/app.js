@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 /* globals PDFBug, Stats */
-
 import {
   animationStarted, DEFAULT_SCALE_VALUE, getPDFFileNameFromURL, isFileSchema,
   isValidRotation, MAX_SCALE, MIN_SCALE, noContextMenuHandler,
@@ -28,6 +27,7 @@ import {
 import { CursorTool, PDFCursorTools } from './pdf_cursor_tools';
 import { PDFRenderingQueue, RenderingStates } from './pdf_rendering_queue';
 import { PDFSidebar, SidebarView } from './pdf_sidebar';
+import _ from 'lodash';
 import { AppOptions } from './app_options';
 import { getGlobalEventBus } from './dom_events';
 import { OverlayManager } from './overlay_manager';
@@ -329,8 +329,26 @@ let PDFViewerApplication = {
    * @private
    */
   _initializeL10n() {
+    const getSuggestedLocale = (search = location.search) => {
+      let locale = null;
+      if (!_.startsWith(search, '?')) {
+        return {};
+      }
+      search = _.keyBy(_.map(search.substr(1).split('&'), (pair) => {
+        return {
+          key: _.first(pair.split('=')),
+          value: _.last(pair.split('=')),
+        };
+      }), 'key');
+
+      if (search.locale) {
+        locale = search.locale.value;
+      }
+      return locale;
+    };
+    const locale = getSuggestedLocale() || AppOptions.get('locale');
     this.l10n = this.externalServices.createL10n({
-      locale: AppOptions.get('locale'),
+      locale,
     });
     return this.l10n.getDirection().then((dir) => {
       document.getElementsByTagName('html')[0].dir = dir;
