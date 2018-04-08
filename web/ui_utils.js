@@ -388,10 +388,31 @@ function isDataSchema(url) {
  * @returns {string} Guessed PDF filename.
  */
 function getPDFFileNameFromURL(url, defaultFilename = 'document.pdf') {
+  const getSuggestedFilename = (search = '') => {
+    let suggestedFilename = null;
+    if (!_.startsWith(search, '?')) {
+      return {};
+    }
+    search = _.keyBy(_.map(search.substr(1).split('&'), (pair) => {
+      return {
+        key: _.first(pair.split('=')),
+        value: _.last(pair.split('=')),
+      };
+    }), 'key');
+
+    if (search.suggestedFilename) {
+      suggestedFilename = [search.suggestedFilename.value];
+    }
+    return suggestedFilename;
+  };
+  let suggestedFilename = null;
   if (isDataSchema(url)) {
     console.warn('getPDFFileNameFromURL: ' +
                  'ignoring "data:" URL for performance reasons.');
-    return defaultFilename;
+    suggestedFilename = getSuggestedFilename(location.search);
+    if (!suggestedFilename) {
+      return defaultFilename;
+    }
   }
   const reURI = /^(?:(?:[^:]+:)?\/\/[^\/]+)?([^?#]*)(\?[^#]*)?(#.*)?$/;
   //            SCHEME        HOST         1.PATH  2.QUERY   3.REF
@@ -399,21 +420,12 @@ function getPDFFileNameFromURL(url, defaultFilename = 'document.pdf') {
   const reFilename = /[^\/?#=]+\.pdf\b(?!.*\.pdf\b)/i;
   let splitURI = reURI.exec(url);
 
-  let suggestedFilename = reFilename.exec(splitURI[1]) ||
+  suggestedFilename = suggestedFilename || reFilename.exec(splitURI[1]) ||
                           reFilename.exec(splitURI[2]) ||
                           reFilename.exec(splitURI[3]);
   let uriSearch = splitURI[2];
-  if (uriSearch) {
-    uriSearch = _.keyBy(_.map(uriSearch.substr(1).split('&'), (pair) => {
-      return {
-        key: _.first(pair.split('=')),
-        value: _.last(pair.split('=')),
-      };
-    }), 'key');
-
-    if (uriSearch.suggestedFilename) {
-      suggestedFilename = [uriSearch.suggestedFilename.value];
-    }
+  if (!suggestedFilename && uriSearch) {
+    suggestedFilename = getSuggestedFilename(uriSearch);
   }
   if (suggestedFilename) {
     suggestedFilename = suggestedFilename[0];
