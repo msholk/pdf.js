@@ -1889,7 +1889,8 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
 
 .visibleLargeView,
 .visibleMediumView,
-.visibleSmallView {
+.visibleSmallView,
+.hidden {
   display: none;
 }
 
