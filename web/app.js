@@ -1520,7 +1520,8 @@ if (typeof PDFJSDev === 'undefined' || PDFJSDev.test('GENERIC')) {
       // IE10 / IE11 does not include an origin in `blob:`-URLs. So don't block
       // any blob:-URL. The browser's same-origin policy will block requests to
       // blob:-URLs from other origins, so this is safe.
-      if (origin !== viewerOrigin && protocol !== 'blob:') {
+      const validProtocol = (protocol === 'blob:' || protocol === 'data:');
+      if (origin !== viewerOrigin && !validProtocol) {
         throw new Error('file origin does not match viewer\'s');
       }
     } catch (ex) {
@@ -1594,6 +1595,11 @@ function webViewerInitialized() {
     let queryString = document.location.search.substring(1);
     let params = parseQueryString(queryString);
     file = 'file' in params ? params.file : AppOptions.get('defaultUrl');
+    if (_.startsWith(file, 'localStorage-')) {
+      file = file.substr('localStorage-'.length);
+      file = localStorage[file];
+      localStorage[file] = null;
+    }
     validateFileURL(file);
   } else if (PDFJSDev.test('FIREFOX || MOZCENTRAL')) {
     file = window.location.href.split('#')[0];

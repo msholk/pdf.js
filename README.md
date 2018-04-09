@@ -11,6 +11,7 @@ rendering PDFs.
 + Specify download file name through URL(&suggestedFilename=)
 + Add pinch to zoom to viewer
 + Specify locale through URL(&locale)
++ Specify base64 PDF data through localStorage(file=localStorage-varName)
 ## Contributing
 
 PDF.js is an open source project and always looking for more contributors. To
